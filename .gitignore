@@ -1,0 +1,3 @@
+/target/
+/artifacts/
+*.f64le.tmp
