@@ -145,6 +145,9 @@ streaming checks. They do not inherit Standard's signal
 measurements. The [verification guide](docs/verification.md) records test scope
 and known extreme-rate limits.
 
+[HA SRC Test Results - Standard](https://src.hydrogenaudio.org/compareresults?id1=0b9ce379-f4af-4c06-ab41-7d373d192af9&id2=0)
+[HA SRC Test Results - ExtraLong](https://src.hydrogenaudio.org/compareresults?id1=d8988997-95d6-4dea-95af-2cda4849f70d&id2=0)
+
 ## Examples
 
 Measure setup, processing time, coefficient storage and buffering on your host:
