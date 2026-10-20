@@ -65,6 +65,7 @@ pub(crate) struct Fir {
     clock: Clock,
     // Packed rows contain stereo pairs from successive rational periods:
     // [left_period0, right_period0, left_period1, right_period1, ...].
+    #[cfg(any(test, target_arch = "x86_64", target_arch = "aarch64"))]
     phase_scratch: Vec<f64>,
     phase_batch_backend: PhaseBatchBackend,
     interpolated_stereo_backend: InterpolatedStereoBackend,
@@ -111,6 +112,7 @@ impl Fir {
             half_taps: (design.taps / 2) as i64,
             coeffs: shared_coefficients(from_rate, to_rate, design),
             buffer: Vec::new(),
+            #[cfg(any(test, target_arch = "x86_64", target_arch = "aarch64"))]
             phase_scratch: Vec::new(),
             phase_batch_backend: if channels == 2 {
                 Self::phase_batch_backend_for_rates(from_rate, to_rate, design)
@@ -833,6 +835,7 @@ impl Fir {
     }
 
     // None falls back. Some(0) waits. Some(n) appends n samples and advances.
+    #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
     fn try_process_phase_tile(
         &mut self,
         total_frames: i64,
@@ -850,6 +853,17 @@ impl Fir {
             #[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
             _ => self.try_process_phase_tile_narrow(total_frames, eof, output),
         }
+    }
+
+    // Scalar-only targets have no phase-tile backend and always fall back.
+    #[cfg(not(any(target_arch = "x86_64", target_arch = "aarch64")))]
+    fn try_process_phase_tile(
+        &mut self,
+        _total_frames: i64,
+        _eof: bool,
+        _output: &mut [f64],
+    ) -> Option<usize> {
+        None
     }
 
     // A rational phase repeats after step_den outputs and step_num inputs.

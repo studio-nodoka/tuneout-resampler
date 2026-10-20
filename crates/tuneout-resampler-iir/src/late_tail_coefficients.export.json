@@ -1,0 +1,11 @@
+{
+  "core_model_sha256": "35f421e9f8050c49c6f2037ddb8becaeaaa116003f8302b145ab57e9627940b5",
+  "tail_model_sha256": "4cf764e2ee58aef9fb83f45b775667353c48faa08085fb71d3cb1ca94467f291",
+  "exporter_sha256": "1c91f6312d577572432b5823c1230ad1b3c644622c6e5e68e1213434ad7e70c9",
+  "coefficients_sha256": "be0dd7455f4d87ccc459891cb672a2d07250535b9c3cb27f5b00d597c83f4fe5",
+  "core_modes": 78,
+  "finite_correction_modes": 206,
+  "support_end_lower_samples": 29400,
+  "omitted_two_sided_L1": "3.063098693723209942080450225422447251878014592885216646397820772769358e-29",
+  "rate_policy": "One normalized model; runtime derives all rate-specific coefficients."
+}

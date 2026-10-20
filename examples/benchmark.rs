@@ -3,7 +3,7 @@
 mod support;
 
 use std::{error::Error, hint::black_box, time::Instant};
-use tuneout_resampler::Resampler;
+use tuneout_resampler::FiniteResampler;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = std::env::args().collect();
@@ -21,12 +21,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     let started = Instant::now();
     let converter =
-        Resampler::with_filter_length_policy(from, to, channels, filter_length, policy)?;
+        FiniteResampler::with_filter_length_policy(from, to, channels, filter_length, policy)?;
     let first_setup = started.elapsed();
     let info = converter.filter_info();
     let started = Instant::now();
     let mut converter =
-        Resampler::with_filter_length_policy(from, to, channels, filter_length, policy)?;
+        FiniteResampler::with_filter_length_policy(from, to, channels, filter_length, policy)?;
     let cached_setup = started.elapsed();
     let frames = from as usize;
     let samples = frames.checked_mul(channels).ok_or("input size overflow")?;

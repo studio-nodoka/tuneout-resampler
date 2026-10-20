@@ -15,17 +15,17 @@ jobs:
       - name: Toolchain
         run: rustup update stable --no-self-update
       - name: Format
-        run: cargo fmt --check
+        run: cargo fmt --all --check
       - name: Lint
-        run: cargo clippy --locked --all-targets -- -D warnings
-      - name: Test
-        run: cargo test --locked --all-targets
+        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+      - name: Tests and example builds
+        run: cargo test --release --locked --workspace --all-targets
       - name: Documentation examples
-        run: cargo test --locked --doc
+        run: cargo test --release --locked --workspace --doc
       - name: Documentation warnings
         env:
           RUSTDOCFLAGS: -D warnings
-        run: cargo doc --locked --no-deps
+        run: cargo doc --locked --workspace --no-deps
   minimum-rust:
     runs-on: ubuntu-latest
     steps:
@@ -33,15 +33,34 @@ jobs:
         with:
           persist-credentials: false
       - run: rustup toolchain install 1.89.0 --profile minimal
-      - run: cargo +1.89.0 test --locked --all-targets
+      - run: cargo +1.89.0 test --release --locked --workspace --all-targets
   cross-check:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [aarch64-apple-darwin, x86_64-apple-darwin, aarch64-unknown-linux-musl]
+        target:
+          - aarch64-apple-darwin
+          - x86_64-apple-darwin
+          - aarch64-apple-ios
+          - aarch64-unknown-linux-musl
+          - aarch64-linux-android
+          - armv7-linux-androideabi
+          - i686-linux-android
+          - x86_64-linux-android
+          - wasm32-unknown-unknown
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - run: rustup target add ${{ matrix.target }}
-      - run: cargo check --locked --all-targets --target ${{ matrix.target }}
+      - run: cargo clippy --locked --workspace --all-targets --target ${{ matrix.target }} -- -D warnings
+  wasm-simd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: rustup target add wasm32-unknown-unknown
+      - run: cargo clippy --locked --workspace --all-targets --target wasm32-unknown-unknown -- -D warnings
+        env:
+          RUSTFLAGS: -C target-feature=+simd128

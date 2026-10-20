@@ -2,23 +2,27 @@ use super::*;
 use crate::test_assertions::assert_bits_eq;
 
 fn backends() -> Vec<PhaseBatchBackend> {
-    let mut result = Vec::new();
-    #[cfg(target_arch = "x86_64")]
-    {
-        if std::is_x86_feature_detected!("avx") {
-            result.push(PhaseBatchBackend::Avx);
-        }
-        if std::is_x86_feature_detected!("avx512f") {
-            result.push(PhaseBatchBackend::Avx512);
-        }
-    }
-    #[cfg(target_arch = "aarch64")]
-    if std::arch::is_aarch64_feature_detected!("neon") {
-        result.push(PhaseBatchBackend::Neon);
-    }
-    result
+    let candidates: &[(bool, PhaseBatchBackend)] = &[
+        #[cfg(target_arch = "x86_64")]
+        (std::is_x86_feature_detected!("avx"), PhaseBatchBackend::Avx),
+        #[cfg(target_arch = "x86_64")]
+        (
+            std::is_x86_feature_detected!("avx512f"),
+            PhaseBatchBackend::Avx512,
+        ),
+        #[cfg(target_arch = "aarch64")]
+        (
+            std::arch::is_aarch64_feature_detected!("neon"),
+            PhaseBatchBackend::Neon,
+        ),
+    ];
+    candidates
+        .iter()
+        .filter_map(|&(available, backend)| available.then_some(backend))
+        .collect()
 }
 
+#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
 fn narrow_backends() -> Vec<PhaseBatchBackend> {
     backends()
         .into_iter()
@@ -358,6 +362,7 @@ fn production_dispatch_uses_common_geometry_latency_and_memory_limits() {
 }
 
 #[test]
+#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
 fn narrow_dot_products_preserve_rounding_cancellation_and_subnormals() {
     for backend in narrow_backends() {
         let delta = 2.0f64.powi(-27);

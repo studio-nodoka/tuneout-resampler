@@ -1,4 +1,4 @@
-//! # Tuneout Resampler
+//! # Finite
 //!
 //! Streaming C1 polyphase FIR sample-rate conversion for interleaved PCM.
 //!
@@ -9,9 +9,9 @@
 //! SIMD batching follows common geometry and resource rules under both policies.
 //!
 //! ```
-//! use tuneout_resampler::Resampler;
+//! use tuneout_resampler::FiniteResampler;
 //! # fn main() -> Result<(), tuneout_resampler::Error> {
-//! let mut converter = Resampler::new(48_000, 44_100, 2)?;
+//! let mut converter = FiniteResampler::new(48_000, 44_100, 2)?;
 //! let stereo_input = vec![0.0_f64; 2 * 4096];
 //! let mut output = converter.process_f64(&stereo_input, false)?;
 //! output.extend(converter.process_f64(&[], true)?);
@@ -21,11 +21,11 @@
 //! ```
 //!
 //! Set `end_of_stream` only for the final block, or flush with an empty final
-//! block. Call [`Resampler::reset`] before reusing an instance for a new stream.
+//! block. Call [`FiniteResampler::reset`] before reusing an instance for a new stream.
 //! Equal rates bypass filtering. Construction and processing allocate memory.
 //! This crate does not promise allocation-free device-callback operation.
-//! Use [`Resampler::with_filter_length`] to choose a preset or an exact tap count.
-//! Use [`Resampler::with_filter_length_policy`] to select the length policy too.
+//! Use [`FiniteResampler::with_filter_length`] to choose a preset or an exact tap count.
+//! Use [`FiniteResampler::with_filter_length_policy`] to select the length policy too.
 
 #![deny(unsafe_code)]
 #![deny(unsafe_op_in_unsafe_fn)]
@@ -99,14 +99,14 @@ impl std::error::Error for Error {}
 /// Filter support chosen at construction, in input samples per phase.
 ///
 /// Presets adapt to the rate pair and respect the existing tap, coefficient-memory
-/// and support-time limits. Inspect [`Resampler::filter_info`] for the actual
+/// and support-time limits. Inspect [`FiniteResampler::filter_info`] for the actual
 /// length and lookahead. Longer filters narrow the transition band but increase
 /// computation, memory, lookahead and ringing duration. Length alone is not a
 /// quality guarantee. The window, cutoff and coefficient precision stay the same.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum FilterLength {
     /// The base length under the selected [`FilterLengthPolicy`].
-    /// With the default generic policy, matches [`Resampler::new`] exactly.
+    /// With the default generic policy, matches [`FiniteResampler::new`] exactly.
     #[default]
     Standard,
     /// 175% of the standard length, rounded up to odd, subject to resource limits.
@@ -171,7 +171,7 @@ pub struct FilterInfo {
 /// Coefficients and convolution use f64. `process_f32` promotes its input to f64
 /// and rounds only the returned samples. Finite PCM input is expected. Values
 /// outside [-1, 1] are allowed and are not clipped or normalized.
-pub struct Resampler {
+pub struct FiniteResampler {
     inner: Option<fir::Fir>,
     input_rate: u32,
     output_rate: u32,
@@ -181,7 +181,10 @@ pub struct Resampler {
     finished: bool,
 }
 
-impl Resampler {
+/// Compatibility name for [`FiniteResampler`].
+pub type Resampler = FiniteResampler;
+
+impl FiniteResampler {
     /// Construct a converter. Rates are in Hz. Channels use interleaved storage.
     ///
     /// Reuses a matching cached bank, or generates it at extended precision on
@@ -202,12 +205,12 @@ impl Resampler {
     /// [`Self::new`].
     ///
     /// ```
-    /// use tuneout_resampler::{FilterLength, Resampler};
+    /// use tuneout_resampler::{FilterLength, FiniteResampler};
     /// # fn main() -> Result<(), tuneout_resampler::Error> {
-    /// let long = Resampler::with_filter_length(48_000, 44_100, 2, FilterLength::Long)?;
-    /// let standard = Resampler::new(48_000, 44_100, 2)?;
+    /// let long = FiniteResampler::with_filter_length(48_000, 44_100, 2, FilterLength::Long)?;
+    /// let standard = FiniteResampler::new(48_000, 44_100, 2)?;
     /// assert!(long.filter_info().taps_per_phase >= standard.filter_info().taps_per_phase);
-    /// let custom = Resampler::with_filter_length(48_000, 44_100, 2, FilterLength::Custom(4_095))?;
+    /// let custom = FiniteResampler::with_filter_length(48_000, 44_100, 2, FilterLength::Custom(4_095))?;
     /// assert_eq!(custom.filter_info().taps_per_phase, 4_095);
     /// # Ok(())
     /// # }
@@ -236,9 +239,9 @@ impl Resampler {
     /// Validation and stream behavior otherwise match [`Self::with_filter_length`].
     ///
     /// ```
-    /// use tuneout_resampler::{FilterLength, FilterLengthPolicy, Resampler};
+    /// use tuneout_resampler::{FilterLength, FilterLengthPolicy, FiniteResampler};
     /// # fn main() -> Result<(), tuneout_resampler::Error> {
-    /// let fixed = Resampler::with_filter_length_policy(
+    /// let fixed = FiniteResampler::with_filter_length_policy(
     ///     48_000, 44_100, 2, FilterLength::Standard, FilterLengthPolicy::Fixed,
     /// )?;
     /// assert_eq!(fixed.filter_length_policy(), FilterLengthPolicy::Fixed);

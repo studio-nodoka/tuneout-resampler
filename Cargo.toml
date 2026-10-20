@@ -1,9 +1,9 @@
 [package]
 name = "tuneout-resampler"
-version = "0.9.91-C1R3"
+version.workspace = true
 edition = "2021"
 rust-version = "1.89"
-description = "Standalone streaming C1 polyphase FIR sample-rate converter"
+description = "Finite: streaming C1 polyphase FIR sample-rate conversion"
 repository = "https://github.com/studio-nodoka/tuneout-resampler"
 readme = "README.md"
 license = "Apache-2.0"
@@ -17,3 +17,10 @@ path = "tools/generate-fingerprints.rs"
 
 [profile.test]
 opt-level = 2
+
+[workspace]
+members = ["crates/tuneout-resampler-iir"]
+resolver = "2"
+
+[workspace.package]
+version = "1.0.0"

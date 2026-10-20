@@ -2,7 +2,7 @@
 mod support;
 
 use std::{error::Error, fs};
-use tuneout_resampler::Resampler;
+use tuneout_resampler::FiniteResampler;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = std::env::args().collect();
@@ -12,7 +12,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let input_rate = args[2].parse()?;
     let output_rate = args[3].parse()?;
     if args[1] == "coefficients" && (5..=7).contains(&args.len()) {
-        let converter = Resampler::with_filter_length_policy(
+        let converter = FiniteResampler::with_filter_length_policy(
             input_rate,
             output_rate,
             1,
@@ -34,7 +34,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         return Err("invalid arguments".into());
     }
     let channels: usize = args[4].parse()?;
-    let mut converter = Resampler::with_filter_length_policy(
+    let mut converter = FiniteResampler::with_filter_length_policy(
         input_rate,
         output_rate,
         channels,

@@ -1,5 +1,6 @@
 use super::*;
 
+#[cfg(any(target_arch = "x86_64", target_arch = "aarch64"))]
 fn equal_bits(a: [[f64; 2]; 4], b: [[f64; 2]; 4]) {
     for frame in 0..4 {
         for ch in 0..2 {
@@ -12,7 +13,12 @@ fn equal_bits(a: [[f64; 2]; 4], b: [[f64; 2]; 4]) {
     }
 }
 
-fn check_kernels(samples: [&[f64]; 4], lower: [&[f64]; 4], upper: [&[f64]; 4], blends: [f64; 4]) {
+fn check_kernels(
+    samples: [&[f64]; 4],
+    lower: [&[f64]; 4],
+    upper: [&[f64]; 4],
+    blends: [f64; 4],
+) -> [[f64; 2]; 4] {
     let expected = Fir::convolve_interpolated_stereo_scalar(samples, lower, upper, blends);
     #[cfg(target_arch = "x86_64")]
     {
@@ -32,19 +38,14 @@ fn check_kernels(samples: [&[f64]; 4], lower: [&[f64]; 4], upper: [&[f64]; 4], b
         expected,
         Fir::convolve_interpolated_stereo_neon(samples, lower, upper, blends),
     );
+    expected
 }
 
 #[test]
 fn interpolation_and_accumulation_keep_separate_rounding() {
     let delta = 2.0f64.powi(-27);
     // Fusing coefficient interpolation would produce -2^-54 rather than zero.
-    check_kernels([&[1., 1.]; 4], [&[-1.]; 4], [&[delta]; 4], [1. - delta; 4]);
-    let output = Fir::convolve_interpolated_stereo_scalar(
-        [&[1., 1.]; 4],
-        [&[-1.]; 4],
-        [&[delta]; 4],
-        [1. - delta; 4],
-    );
+    let output = check_kernels([&[1., 1.]; 4], [&[-1.]; 4], [&[delta]; 4], [1. - delta; 4]);
     assert_eq!(output[0].map(f64::to_bits), [0.0f64.to_bits(); 2]);
     // Fusing the dot product's second multiply/add would also produce -2^-54.
     check_kernels(

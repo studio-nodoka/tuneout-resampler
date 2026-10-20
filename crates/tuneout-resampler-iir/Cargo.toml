@@ -1,0 +1,16 @@
+[package]
+name = "tuneout-resampler-iir"
+version.workspace = true
+edition = "2021"
+rust-version = "1.89"
+description = "Generic sample-rate conversion with a modal IIR core and finite FIR correction"
+license = "Apache-2.0"
+repository = "https://github.com/studio-nodoka/tuneout-resampler"
+readme = "README.md"
+publish = false
+
+[dependencies]
+rustfft = "=6.4.1"
+
+[dev-dependencies]
+tuneout-resampler = { path = "../.." }
