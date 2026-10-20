@@ -2,6 +2,9 @@ name: Rust
 on: [push, pull_request]
 permissions:
   contents: read
+env:
+  # Keep strict lint results reproducible; build and test on current stable Rust.
+  CLIPPY_TOOLCHAIN: "1.93.1"
 jobs:
   test:
     strategy:
@@ -13,11 +16,13 @@ jobs:
         with:
           persist-credentials: false
       - name: Toolchain
-        run: rustup update stable --no-self-update
+        run: |
+          rustup update stable --no-self-update
+          rustup toolchain install ${{ env.CLIPPY_TOOLCHAIN }} --profile minimal --component clippy
       - name: Format
         run: cargo fmt --all --check
       - name: Lint
-        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+        run: cargo +${{ env.CLIPPY_TOOLCHAIN }} clippy --locked --workspace --all-targets -- -D warnings
       - name: Tests and example builds
         run: cargo test --release --locked --workspace --all-targets
       - name: Documentation examples
@@ -52,15 +57,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - run: rustup target add ${{ matrix.target }}
-      - run: cargo clippy --locked --workspace --all-targets --target ${{ matrix.target }} -- -D warnings
+      - run: rustup toolchain install ${{ env.CLIPPY_TOOLCHAIN }} --profile minimal --component clippy --target ${{ matrix.target }}
+      - run: cargo +${{ env.CLIPPY_TOOLCHAIN }} clippy --locked --workspace --all-targets --target ${{ matrix.target }} -- -D warnings
   wasm-simd:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - run: rustup target add wasm32-unknown-unknown
-      - run: cargo clippy --locked --workspace --all-targets --target wasm32-unknown-unknown -- -D warnings
+      - run: rustup toolchain install ${{ env.CLIPPY_TOOLCHAIN }} --profile minimal --component clippy --target wasm32-unknown-unknown
+      - run: cargo +${{ env.CLIPPY_TOOLCHAIN }} clippy --locked --workspace --all-targets --target wasm32-unknown-unknown -- -D warnings
         env:
           RUSTFLAGS: -C target-feature=+simd128
