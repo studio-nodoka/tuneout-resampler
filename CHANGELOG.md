@@ -1,5 +1,10 @@
 # Changes
 
+## Unreleased
+
+- Place Finite and Infinite in sibling crates under a virtual Cargo workspace.
+  Package names, Rust APIs, shared version 1.0.0 and converter output are unchanged.
+
 ## 1.0.0 — 2026-10-20
 
 - Release Finite and Infinite together as 1.0.0 in one Cargo workspace, with a

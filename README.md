@@ -42,16 +42,18 @@ drain cost and lookahead on the intended rate pairs and processor.
 
 | Guide | Finite | Infinite |
 | --- | --- | --- |
-| Usage and configuration | [Finite](docs/finite.md) | [Infinite](crates/tuneout-resampler-iir/README.md) |
-| Design | [Filter and implementation](docs/design.md) | [Filter and implementation](crates/tuneout-resampler-iir/docs/design.md) |
+| Usage and configuration | [Finite](crates/tuneout-resampler-fir/README.md) | [Infinite](crates/tuneout-resampler-iir/README.md) |
+| Design | [Filter and implementation](crates/tuneout-resampler-fir/docs/design.md) | [Filter and implementation](crates/tuneout-resampler-iir/docs/design.md) |
 
 Both usage guides follow the same structure and include streaming, endpoint and
 playback constraints. See [CHANGELOG.md](CHANGELOG.md) for package changes.
 
 ## Build and check
 
-Finite is the root package; Infinite is an independent workspace member.
-Both inherit the version from `[workspace.package]` in the root `Cargo.toml`.
+The root is a Cargo workspace. Finite lives in `crates/tuneout-resampler-fir`
+and Infinite in `crates/tuneout-resampler-iir`. Both inherit the version from
+`[workspace.package]` in the root `Cargo.toml`. Finite's package name remains
+`tuneout-resampler`.
 
 ```sh
 cargo build --release --locked --workspace
@@ -68,6 +70,6 @@ on another processor. Tests and examples are development tools.
 
 ## License
 
-[Apache 2.0](LICENSE). Retain the applicable [Finite notice](NOTICE) and
+[Apache 2.0](LICENSE). Retain the applicable [Finite notice](crates/tuneout-resampler-fir/NOTICE) and
 [Infinite notice](crates/tuneout-resampler-iir/NOTICE.md); see
-[LICENSING.md](LICENSING.md).
+[Finite licensing](crates/tuneout-resampler-fir/LICENSING.md).

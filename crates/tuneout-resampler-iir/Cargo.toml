@@ -13,4 +13,4 @@ publish = false
 rustfft = "=6.4.1"
 
 [dev-dependencies]
-tuneout-resampler = { path = "../.." }
+tuneout-resampler = { path = "../tuneout-resampler-fir" }

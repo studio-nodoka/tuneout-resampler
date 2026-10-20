@@ -1,0 +1,16 @@
+[package]
+name = "tuneout-resampler"
+version.workspace = true
+edition = "2021"
+rust-version = "1.89"
+description = "Finite: streaming C1 polyphase FIR sample-rate conversion"
+repository = "https://github.com/studio-nodoka/tuneout-resampler"
+readme = "README.md"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+
+[[example]]
+name = "fingerprints"
+path = "tools/generate-fingerprints.rs"

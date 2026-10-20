@@ -3,7 +3,7 @@
 **1.0.0** · `tuneout-resampler` · Rust 1.89+
 
 A polyphase FIR sample-rate converter for interleaved f64/f32 PCM, with independent
-channels and no runtime dependencies. [Apache 2.0](../LICENSE); see [NOTICE](../NOTICE).
+channels and no runtime dependencies. [Apache 2.0](LICENSE); see [NOTICE](NOTICE).
 
 ## Get started
 
@@ -76,7 +76,7 @@ application choices. Use f64 to retain sub-f32 detail.
 A centered C1 windowed-sinc FIR uses exact rational timing and a nominal cutoff
 at the lower Nyquist frequency. Longer filters narrow the transition at the cost
 of CPU, memory, lookahead and ringing duration. Resource caps can limit rejection
-at extreme ratios. See the [design overview](design.md).
+at extreme ratios. See the [design overview](docs/design.md).
 
 ## Build and check
 
